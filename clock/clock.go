@@ -2,27 +2,32 @@ package clock
 
 import "fmt"
 
-//TestVersion is the unit tests this is guarenteed to pass.
-const TestVersion = 2
+type Clock struct {
+	minutes int
+}
 
-//Clock keeps time, limited to a day
-type Clock int
+var minutesInADay int = 24 * 60
 
-/*Time creates a Clock set to a given time.*/
-func Time(hour, minute int) Clock {
-	time := (hour*60 + minute) % (60 * 24)
-	if time < 0 {
-		time += 60 * 24
+func New(hours int, minutes int) Clock {
+	totalMinutes := (60*hours + minutes) % minutesInADay
+	if totalMinutes <= 0 {
+		totalMinutes = (minutesInADay + totalMinutes) % minutesInADay
 	}
-	return Clock(time)
+
+	return Clock{totalMinutes}
 }
 
-/*String returns a clock in digital form hh:mm.*/
-func (c Clock) String() string {
-	return fmt.Sprintf("%02d:%02d", c/60, c%60)
-}
-
-/*Add move the time by a number of minutes.*/
 func (c Clock) Add(minutes int) Clock {
-	return Time(0, int(c)+minutes)
+	return New(0, c.minutes+minutes)
+}
+
+func (c Clock) toMinutesHours() (int, int) {
+	h := c.minutes / 60
+	m := c.minutes % 60
+	return h, m
+}
+
+func (c Clock) String() string {
+	m, h := c.toMinutesHours()
+	return fmt.Sprintf("%02.f:%02.f", float32(m), float32(h))
 }
